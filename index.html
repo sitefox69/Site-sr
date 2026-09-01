@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stream Request — Panel streamera</title>
+<style>
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #0d0d0f;
+    color: #f1f1f1;
+}
+button {
+    font-family: inherit;
+}
+.app {
+    min-height: 100vh;
+}
+/* =========================
+   TOP BAR
+========================= */
+.topbar {
+    height: 64px;
+    background: #151518;
+    border-bottom: 1px solid #29292e;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+}
+.logo {
+    font-size: 19px;
+    font-weight: 700;
+}
+.logo span {
+    color: #9147ff;
+}
+.status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #8ee28e;
+    font-size: 13px;
+}
+.status-dot {
+    width: 9px;
+    height: 9px;
+    background: #48d848;
+    border-radius: 50%;
+}
+/* =========================
+   LAYOUT
+========================= */
+.content {
+    padding: 24px;
+    max-width: 1500px;
+    margin: auto;
+}
+.grid {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap: 20px;
+}
+.card {
+    background: #151518;
+    border: 1px solid #29292e;
+    border-radius: 14px;
+    padding: 20px;
+}
+.card h2 {
+    margin: 0 0 16px;
+    font-size: 17px;
+}
+.card-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+.card-title h2 {
+    margin: 0;
+}
+/* =========================
+   PLAYER
+========================= */
+.player {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 18px;
+}
+.cover {
+    width: 150px;
+    height: 150px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #9147ff, #4b227e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+}
+.song-info h1 {
+    margin: 5px 0 7px;
+    font-size: 25px;
+}
+.song-info p {
+    margin: 0;
+    color: #8d8d94;
+}
+.progress {
+    height: 6px;
+    background: #29292e;
+    border-radius: 10px;
+    margin: 24px 0 8px;
+    overflow: hidden;
+}
+.progress-bar {
+    width: 43%;
+    height: 100%;
+    background: #9147ff;
+}
+.time {
+    display: flex;
+    justify-content: space-between;
+    color: #777;
+    font-size: 11px;
+}
+.player-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+}
+.control-button {
+    border: 1px solid #333339;
+    background: #202025;
+    color: white;
+    border-radius: 9px;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+.control-button:hover {
+    background: #29292f;
+}
+.control-button.primary {
+    background: #9147ff;
+    border-color: #9147ff;
+}
+/* =========================
+   QUEUE
+========================= */
+.queue-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-bottom: 1px solid #25252a;
+}
+.queue-item:last-child {
+    border-bottom: 0;
+}
+.queue-number {
+    width: 25px;
+    color: #777;
+    text-align: center;
+}
+.queue-cover {
+    width: 42px;
+    height: 42px;
+    border-radius: 7px;
+    background: #29292f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.queue-info {
+    flex: 1;
+}
+.queue-title {
+    font-size: 14px;
+    font-weight: 600;
+}
+.queue-user {
+    color: #777;
+    font-size: 11px;
+    margin-top: 3px;
+}
+.queue-remove {
+    border: 0;
+    background: transparent;
+    color: #777;
+    cursor: pointer;
+    font-size: 17px;
+}
+.queue-remove:hover {
+    color: #ff5555;
+}
+/* =========================
+   VOTE SKIP
+========================= */
+.vote-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #1d1d21;
+    border: 1px solid #2c2c31;
+    padding: 15px;
+    border-radius: 10px;
+}
+.vote-number {
+    font-size: 25px;
+    font-weight: 700;
+}
+.vote-label {
+    color: #85858b;
+    font-size: 12px;
+}
+.switch {
+    position: relative;
+    width: 45px;
+    height: 24px;
+}
+.switch input {
+    display: none;
+}
+.slider {
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    background: #333;
+    cursor: pointer;
+}
+.slider:before {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: .2s;
+}
+.switch input:checked + .slider {
+    background: #9147ff;
+}
+.switch input:checked + .slider:before {
+    transform: translateX(21px);
+}
+.vote-config {
+    margin-top: 14px;
+}
+.input {
+    width: 100%;
+    background: #0f0f11;
+    border: 1px solid #303037;
+    color: white;
+    border-radius: 8px;
+    padding: 11px;
+    outline: none;
+}
+.input:focus {
+    border-color: #9147ff;
+}
+/* =========================
+   MODERATION
+========================= */
+.user-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid #25252a;
+}
+.user-row:last-child {
+    border-bottom: 0;
+}
+.avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #34343a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+.user-data {
+    flex: 1;
+}
+.user-name {
+    font-size: 14px;
+    font-weight: 600;
+}
+.user-status {
+    color: #777;
+    font-size: 11px;
+    margin-top: 3px;
+}
+.small-button {
+    border: 1px solid #333339;
+    background: #202025;
+    color: white;
+    padding: 8px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.small-button:hover {
+    background: #2b2b31;
+}
+.small-button.danger {
+    border-color: #722727;
+    background: #321919;
+    color: #ff7777;
+}
+.small-button.danger:hover {
+    background: #491d1d;
+}
+.manage-button {
+    width: 100%;
+    margin-top: 14px;
+    padding: 11px;
+    border-radius: 9px;
+    border: 1px solid #34343a;
+    background: #202025;
+    color: white;
+    cursor: pointer;
+}
+.manage-button:hover {
+    background: #29292f;
+}
+/* =========================
+   CHAT COMMANDS
+========================= */
+.command {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #25252a;
+}
+.command:last-child {
+    border-bottom: 0;
+}
+.command code {
+    color: #b58aff;
+}
+.command span {
+    color: #777;
+    font-size: 12px;
+}
+/* =========================
+   MODAL
+========================= */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.72);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+}
+.modal-overlay.active {
+    display: flex;
+}
+.modal {
+    width: 100%;
+    max-width: 470px;
+    background: #17171b;
+    border: 1px solid #303036;
+    border-radius: 14px;
+    box-shadow: 0 20px 70px rgba(0,0,0,.55);
+}
+.modal.large {
+    max-width: 650px;
+}
+.modal-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid #29292e;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.modal-header h2 {
+    margin: 0;
+    font-size: 17px;
+}
+.modal-close {
+    border: 0;
+    background: transparent;
+    color: #888;
+    font-size: 24px;
+    cursor: pointer;
+}
+.modal-close:hover {
+    color: white;
+}
+.modal-body {
+    padding: 20px;
+}
+.selected-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #202025;
+    border: 1px solid #2e2e34;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+.user-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #9147ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+.selected-user strong {
+    display: block;
+}
+.selected-user span {
+    display: block;
+    color: #777;
+    font-size: 11px;
+    margin-top: 3px;
+}
+.input-label {
+    display: block;
+    color: #aaa;
+    font-size: 12px;
+    margin-bottom: 9px;
+}
+.timeout-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+}
+.timeout-options button {
+    padding: 12px;
+    background: #222228;
+    color: white;
+    border: 1px solid #35353c;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.timeout-options button:hover {
+    background: #2c2c33;
+    border-color: #9147ff;
+}
+/* =========================
+   BAN W TIMEOUT MODAL
+========================= */
+.ban-divider {
+    height: 1px;
+    background: #303036;
+    margin: 24px 0 18px;
+}
+.ban-user-button {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1px solid #8f2525;
+    border-radius: 9px;
+    background: #351717;
+    color: #ff6b6b;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.ban-user-button:hover {
+    background: #501b1b;
+    border-color: #c93636;
+}
+.ban-warning {
+    margin: 9px 0 0;
+    text-align: center;
+    font-size: 11px;
+    color: #777;
+}
+/* =========================
+   MANAGE BANS
+========================= */
+.tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+}
+.tab {
+    border: 1px solid #333339;
+    background: #202025;
+    color: #aaa;
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.tab.active {
+    background: #9147ff;
+    border-color: #9147ff;
+    color: white;
+}
+.ban-list {
+    max-height: 360px;
+    overflow-y: auto;
+}
+.empty {
+    text-align: center;
+    color: #666;
+    padding: 30px 10px;
+    font-size: 13px;
+}
+.ban-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 0;
+    border-bottom: 1px solid #28282d;
+}
+.ban-item:last-child {
+    border-bottom: 0;
+}
+.ban-item-info {
+    flex: 1;
+}
+.ban-item-name {
+    font-size: 13px;
+    font-weight: 600;
+}
+.ban-item-meta {
+    color: #707078;
+    font-size: 10px;
+    margin-top: 3px;
+}
+/* =========================
+   NOTIFICATION
+========================= */
+.notification {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    background: #222228;
+    border: 1px solid #3a3a42;
+    padding: 13px 16px;
+    border-radius: 9px;
+    display: none;
+    z-index: 2000;
+    box-shadow: 0 10px 30px rgba(0,0,0,.4);
+}
+.notification.active {
+    display: block;
+}
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 950px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+@media (max-width: 600px) {
+    .content {
+        padding: 14px;
+    }
+    .player {
+        grid-template-columns: 1fr;
+    }
+    .cover {
+        width: 100%;
+        height: 180px;
+    }
+    .timeout-options {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+<body>
+<div class="app">
+    <!-- TOP BAR -->
+    <div class="topbar">
+        <div class="logo">
+            Stream<span>Request</span>
+        </div>
+        <div class="status">
+            <div class="status-dot"></div>
+            System online
+        </div>
+    </div>
+    <div class="content">
+        <div class="grid">
+            <!-- LEWA KOLUMNA -->
+            <div>
+                <!-- PLAYER -->
+                <div class="card">
+                    <h2>Aktualnie odtwarzane</h2>
+                    <div class="player">
+                        <div class="cover">
+                            ♪
+                        </div>
+                        <div class="song-info">
+                            <h1 id="currentSong">
+                                The Weeknd — Blinding Lights
+                            </h1>
+                            <p>
+                                Dodane przez:
+                                <strong id="currentUser">Viewer123</strong>
+                            </p>
+                            <div class="progress">
+                                <div class="progress-bar"></div>
+                            </div>
+                            <div class="time">
+                                <span>1:47</span>
+                                <span>3:20</span>
+                            </div>
+                            <div class="player-controls">
+                                <button
+                                    class="control-button primary"
+                                    onclick="togglePlay()"
+                                >
+                                    ▶ Play / Pause
+                                </button>
+                                <button
+                                    class="control-button"
+                                    onclick="skipSong()"
+                                >
+                                    Skip
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <!-- QUEUE -->
+                <div class="card">
+                    <div class="card-title">
+                        <h2>Kolejka</h2>
+                        <span id="queueCount">5 utworów</span>
+                    </div>
+                    <div id="queue"></div>
+                </div>
+                <br>
+                <!-- VOTE SKIP -->
+                <div class="card">
+                    <div class="card-title">
+                        <h2>Vote Skip</h2>
+                        <label class="switch">
+                            <input
+                                type="checkbox"
+                                id="voteSkipEnabled"
+                                checked
+                                onchange="updateVoteSkip()"
+                            >
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="vote-box">
+                        <div>
+                            <div class="vote-number" id="voteCount">
+                                12 / 30
+                            </div>
+                            <div class="vote-label">
+                                głosy potrzebne do pominięcia
+                            </div>
+                        </div>
+                        <button
+                            class="small-button"
+                            onclick="resetVotes()"
+                        >
+                            Reset
+                        </button>
+                    </div>
+                    <div class="vote-config">
+                        <label class="input-label">
+                            Próg głosów
+                        </label>
+                        <input
+                            class="input"
+                            type="number"
+                            id="voteThreshold"
+                            value="30"
+                            min="1"
+                            onchange="changeThreshold()"
+                        >
+                    </div>
+                </div>
+            </div>
+            <!-- PRAWA KOLUMNA -->
+            <div>
+                <!-- MODERACJA -->
+                <div class="card">
+                    <div class="card-title">
+                        <h2>Moderacja użytkowników</h2>
+                    </div>
+                    <div id="usersList"></div>
+                    <button
+                        class="manage-button"
+                        onclick="openBansModal()"
+                    >
+                        Zarządzaj banami
+                    </button>
+                </div>
+                <br>
+                <!-- BANNED SONGS -->
+                <div class="card">
+                    <div class="card-title">
+                        <h2>Zbanowane utwory</h2>
+                    </div>
+                    <div id="bannedSongs"></div>
+                    <button
+                        class="manage-button"
+                        onclick="banSongPrompt()"
+                    >
+                        + Zbanuj utwór
+                    </button>
+                </div>
+                <br>
+                <!-- COMMANDS -->
+                <div class="card">
+                    <h2>Komendy</h2>
+                    <div class="command">
+                        <code>!play</code>
+                        <span>Odtwórz / kontynuuj</span>
+                    </div>
+                    <div class="command">
+                        <code>!pause</code>
+                        <span>Pauza</span>
+                    </div>
+                    <div class="command">
+                        <code>!skip</code>
+                        <span>Pomiń utwór</span>
+                    </div>
+                    <div class="command">
+                        <code>!song</code>
+                        <span>Aktualny utwór</span>
+                    </div>
+                    <div class="command">
+                        <code>!voteskip</code>
+                        <span>Głosowanie</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- =====================================================
+     MODAL TIMEOUT
+===================================================== -->
+<div
+    class="modal-overlay"
+    id="timeoutModal"
+    onclick="closeModalOutside(event, 'timeoutModal')"
+>
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Timeout użytkownika</h2>
+            <button
+                class="modal-close"
+                onclick="closeTimeoutModal()"
+            >
+                ×
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="selected-user">
+                <div
+                    class="user-avatar"
+                    id="timeoutUserAvatar"
+                >
+                    U
+                </div>
+                <div>
+                    <strong id="timeoutUserName">
+                        Username
+                    </strong>
+                    <span>
+                        Użytkownik
+                    </span>
+                </div>
+            </div>
+            <label class="input-label">
+                Czas timeoutu
+            </label>
+            <div class="timeout-options">
+                <button onclick="applyTimeout(1)">
+                    1 minuta
+                </button>
+                <button onclick="applyTimeout(5)">
+                    5 minut
+                </button>
+                <button onclick="applyTimeout(10)">
+                    10 minut
+                </button>
+                <button onclick="applyTimeout(30)">
+                    30 minut
+                </button>
+                <button onclick="applyTimeout(60)">
+                    1 godzina
+                </button>
+                <button onclick="applyTimeout(1440)">
+                    24 godziny
+                </button>
+            </div>
+            <!-- BAN NA SAMYM DOLE -->
+            <div class="ban-divider"></div>
+            <button
+                class="ban-user-button"
+                onclick="banUserFromTimeout()"
+            >
+                ⛔ Ban użytkownika
+            </button>
+            <p class="ban-warning">
+                Ban uniemożliwi temu użytkownikowi
+                korzystanie z systemu SR.
+            </p>
+        </div>
+    </div>
+</div>
+<!-- =====================================================
+     MODAL ZARZĄDZAJ BANAMI
+===================================================== -->
+<div
+    class="modal-overlay"
+    id="bansModal"
+    onclick="closeModalOutside(event, 'bansModal')"
+>
+    <div class="modal large">
+        <div class="modal-header">
+            <h2>Zarządzaj banami</h2>
+            <button
+                class="modal-close"
+                onclick="closeBansModal()"
+            >
+                ×
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="tabs">
+                <button
+                    class="tab active"
+                    id="tabUsers"
+                    onclick="showBanTab('users')"
+                >
+                    Zbanowani użytkownicy
+                </button>
+                <button
+                    class="tab"
+                    id="tabTimeouts"
+                    onclick="showBanTab('timeouts')"
+                >
+                    Timeouty
+                </button>
+                <button
+                    class="tab"
+                    id="tabSongs"
+                    onclick="showBanTab('songs')"
+                >
+                    Zbanowane utwory
+                </button>
+            </div>
+            <div
+                class="ban-list"
+                id="banManagementList"
+            ></div>
+        </div>
+    </div>
+</div>
+<div
+    class="notification"
+    id="notification"
+></div>
+<script>
+/* =====================================================
+   MOCK DATA
+===================================================== */
+let queue = [
+    {
+        title: "Dua Lipa — Houdini",
+        user: "Kacper"
+    },
+    {
+        title: "Tame Impala — The Less I Know The Better",
+        user: "Mati"
+    },
+    {
+        title: "Arctic Monkeys — Do I Wanna Know?",
+        user: "Viewer123"
+    },
+    {
+        title: "David Guetta — Titanium",
+        user: "Nox"
+    },
+    {
+        title: "Avicii — The Nights",
+        user: "PlayerOne"
+    }
+];
+let users = [
+    {
+        username: "Viewer123",
+        status: "Aktywny"
+    },
+    {
+        username: "Kacper",
+        status: "Aktywny"
+    },
+    {
+        username: "Mati",
+        status: "Aktywny"
+    },
+    {
+        username: "Nox",
+        status: "Aktywny"
+    }
+];
+let timeouts = [
+    {
+        username: "OldViewer",
+        until: "10 min"
+    }
+];
+let bannedUsers = [
+    {
+        username: "Troll123",
+        bannedAt: "01.09.2026"
+    }
+];
+let bannedSongs = [
+    {
+        title: "Rick Astley — Never Gonna Give You Up"
+    }
+];
+let selectedTimeoutUser = null;
+let currentBanTab = "users";
+let voteCount = 12;
+let voteThreshold = 30;
+/* =====================================================
+   QUEUE
+===================================================== */
+function renderQueue() {
+    const container =
+        document.getElementById("queue");
+    container.innerHTML = "";
+    queue.forEach((song, index) => {
+        const row =
+            document.createElement("div");
+        row.className = "queue-item";
+        row.innerHTML = `
+            <div class="queue-number">
+                ${index + 1}
+            </div>
+            <div class="queue-cover">
+                ♪
+            </div>
+            <div class="queue-info">
+                <div class="queue-title">
+                    ${song.title}
+                </div>
+                <div class="queue-user">
+                    Dodane przez: ${song.user}
+                </div>
+            </div>
+            <button
+                class="queue-remove"
+                onclick="removeQueueSong(${index})"
+            >
+                ×
+            </button>
+        `;
+        container.appendChild(row);
+    });
+    document.getElementById("queueCount").textContent =
+        `${queue.length} utworów`;
+}
+function removeQueueSong(index) {
+    const song = queue[index];
+    queue.splice(index, 1);
+    renderQueue();
+    showNotification(
+        `Usunięto: ${song.title}`
+    );
+}
+/* =====================================================
+   USERS
+===================================================== */
+function renderUsers() {
+    const container =
+        document.getElementById("usersList");
+    container.innerHTML = "";
+    users.forEach(user => {
+        const row =
+            document.createElement("div");
+        row.className = "user-row";
+        row.innerHTML = `
+            <div class="avatar">
+                ${user.username.charAt(0).toUpperCase()}
+            </div>
+            <div class="user-data">
+                <div class="user-name">
+                    ${user.username}
+                </div>
+                <div class="user-status">
+                    ${user.status}
+                </div>
+            </div>
+            <button
+                class="small-button"
+                onclick="openTimeoutModal('${user.username}')"
+            >
+                Timeout
+            </button>
+        `;
+        container.appendChild(row);
+    });
+}
+/* =====================================================
+   TIMEOUT MODAL
+===================================================== */
+function openTimeoutModal(username) {
+    selectedTimeoutUser =
+        users.find(
+            user => user.username === username
+        );
+    if (!selectedTimeoutUser) {
+        return;
+    }
+    document.getElementById(
+        "timeoutUserName"
+    ).textContent =
+        selectedTimeoutUser.username;
+    document.getElementById(
+        "timeoutUserAvatar"
+    ).textContent =
+        selectedTimeoutUser.username
+            .charAt(0)
+            .toUpperCase();
+    document.getElementById(
+        "timeoutModal"
+    ).classList.add("active");
+}
+function closeTimeoutModal() {
+    document.getElementById(
+        "timeoutModal"
+    ).classList.remove("active");
+    selectedTimeoutUser = null;
+}
+/* =====================================================
+   APPLY TIMEOUT
+===================================================== */
+function applyTimeout(minutes) {
+    if (!selectedTimeoutUser) {
+        return;
+    }
+    const username =
+        selectedTimeoutUser.username;
+    const existing =
+        timeouts.find(
+            item => item.username === username
+        );
+    if (existing) {
+        existing.until =
+            formatTimeout(minutes);
+    } else {
+        timeouts.push({
+            username: username,
+            until: formatTimeout(minutes)
+        });
+    }
+    closeTimeoutModal();
+    renderUsers();
+    showNotification(
+        `${username} otrzymał timeout na ${formatTimeout(minutes)}.`
+    );
+}
+function formatTimeout(minutes) {
+    if (minutes < 60) {
+        return `${minutes} min`;
+    }
+    if (minutes === 60) {
+        return "1 godz.";
+    }
+    if (minutes === 1440) {
+        return "24 godz.";
+    }
+    return `${minutes} min`;
+}
+/* =====================================================
+   BAN USER FROM TIMEOUT MODAL
+===================================================== */
+function banUserFromTimeout() {
+    if (!selectedTimeoutUser) {
+        return;
+    }
+    const username =
+        selectedTimeoutUser.username;
+    /* Usuń ewentualny timeout */
+    timeouts =
+        timeouts.filter(
+            item => item.username !== username
+        );
+    /* Dodaj do banów, jeśli jeszcze go nie ma */
+    const alreadyBanned =
+        bannedUsers.some(
+            item => item.username === username
+        );
+    if (!alreadyBanned) {
+        bannedUsers.push({
+            username: username,
+            bannedAt:
+                new Date().toLocaleString("pl-PL")
+        });
+    }
+    /* Zamknij modal */
+    closeTimeoutModal();
+    /* Odśwież widoki */
+    renderUsers();
+    renderBannedSongs();
+    showNotification(
+        `${username} został zbanowany.`
+    );
+}
+/* =====================================================
+   MANAGE BANS MODAL
+===================================================== */
+function openBansModal() {
+    currentBanTab = "users";
+    updateBanTabs();
+    renderBanManagement();
+    document.getElementById(
+        "bansModal"
+    ).classList.add("active");
+}
+function closeBansModal() {
+    document.getElementById(
+        "bansModal"
+    ).classList.remove("active");
+}
+function showBanTab(tab) {
+    currentBanTab = tab;
+    updateBanTabs();
+    renderBanManagement();
+}
+function updateBanTabs() {
+    document.getElementById("tabUsers")
+        .classList.toggle(
+            "active",
+            currentBanTab === "users"
+        );
+    document.getElementById("tabTimeouts")
+        .classList.toggle(
+            "active",
+            currentBanTab === "timeouts"
+        );
+    document.getElementById("tabSongs")
+        .classList.toggle(
+            "active",
+            currentBanTab === "songs"
+        );
+}
+function renderBanManagement() {
+    const container =
+        document.getElementById(
+            "banManagementList"
+        );
+    container.innerHTML = "";
+    /* =========================
+       USERS
+    ========================= */
+    if (currentBanTab === "users") {
+        if (bannedUsers.length === 0) {
+            container.innerHTML =
+                `<div class="empty">
+                    Brak zbanowanych użytkowników.
+                </div>`;
+            return;
+        }
+        bannedUsers.forEach((user, index) => {
+            const row =
+                document.createElement("div");
+            row.className = "ban-item";
+            row.innerHTML = `
+                <div class="avatar">
+                    ${user.username
+                        .charAt(0)
+                        .toUpperCase()}
+                </div>
+                <div class="ban-item-info">
+                    <div class="ban-item-name">
+                        ${user.username}
+                    </div>
+                    <div class="ban-item-meta">
+                        Ban: ${user.bannedAt}
+                    </div>
+                </div>
+                <button
+                    class="small-button"
+                    onclick="unbanUser(${index})"
+                >
+                    Odbanuj
+                </button>
+            `;
+            container.appendChild(row);
+        });
+        return;
+    }
+    /* =========================
+       TIMEOUTS
+    ========================= */
+    if (currentBanTab === "timeouts") {
+        if (timeouts.length === 0) {
+            container.innerHTML =
+                `<div class="empty">
+                    Brak aktywnych timeoutów.
+                </div>`;
+            return;
+        }
+        timeouts.forEach((timeout, index) => {
+            const row =
+                document.createElement("div");
+            row.className = "ban-item";
+            row.innerHTML = `
+                <div class="avatar">
+                    ${timeout.username
+                        .charAt(0)
+                        .toUpperCase()}
+                </div>
+                <div class="ban-item-info">
+                    <div class="ban-item-name">
+                        ${timeout.username}
+                    </div>
+                    <div class="ban-item-meta">
+                        Pozostało: ${timeout.until}
+                    </div>
+                </div>
+                <button
+                    class="small-button"
+                    onclick="removeTimeout(${index})"
+                >
+                    Usuń timeout
+                </button>
+            `;
+            container.appendChild(row);
+        });
+        return;
+    }
+    /* =========================
+       SONGS
+    ========================= */
+    if (currentBanTab === "songs") {
+        if (bannedSongs.length === 0) {
+            container.innerHTML =
+                `<div class="empty">
+                    Brak zbanowanych utworów.
+                </div>`;
+            return;
+        }
+        bannedSongs.forEach((song, index) => {
+            const row =
+                document.createElement("div");
+            row.className = "ban-item";
+            row.innerHTML = `
+                <div class="queue-cover">
+                    ♪
+                </div>
+                <div class="ban-item-info">
+                    <div class="ban-item-name">
+                        ${song.title}
+                    </div>
+                    <div class="ban-item-meta">
+                        Zbanowany utwór
+                    </div>
+                </div>
+                <button
+                    class="small-button"
+                    onclick="unbanSong(${index})"
+                >
+                    Usuń ban
+                </button>
+            `;
+            container.appendChild(row);
+        });
+    }
+}
+/* =====================================================
+   UNBAN USER
+===================================================== */
+function unbanUser(index) {
+    const username =
+        bannedUsers[index].username;
+    bannedUsers.splice(index, 1);
+    renderBanManagement();
+    showNotification(
+        `${username} został odbanowany.`
+    );
+}
+/* =====================================================
+   REMOVE TIMEOUT
+===================================================== */
+function removeTimeout(index) {
+    const username =
+        timeouts[index].username;
+    timeouts.splice(index, 1);
+    renderBanManagement();
+    showNotification(
+        `Usunięto timeout użytkownika ${username}.`
+    );
+}
+/* =====================================================
+   BAN SONG
+===================================================== */
+function banSongPrompt() {
+    const title =
+        prompt(
+            "Podaj nazwę utworu do zbanowania:"
+        );
+    if (!title || !title.trim()) {
+        return;
+    }
+    const cleanTitle =
+        title.trim();
+    const exists =
+        bannedSongs.some(
+            song =>
+                song.title.toLowerCase() ===
+                cleanTitle.toLowerCase()
+        );
+    if (exists) {
+        showNotification(
+            "Ten utwór jest już zbanowany."
+        );
+        return;
+    }
+    bannedSongs.push({
+        title: cleanTitle
+    });
+    renderBannedSongs();
+    showNotification(
+        `Zbanowano utwór: ${cleanTitle}`
+    );
+}
+function renderBannedSongs() {
+    const container =
+        document.getElementById(
+            "bannedSongs"
+        );
+    container.innerHTML = "";
+    if (bannedSongs.length === 0) {
+        container.innerHTML =
+            `<div class="empty">
+                Brak zbanowanych utworów.
+            </div>`;
+        return;
+    }
+    bannedSongs.forEach((song, index) => {
+        const row =
+            document.createElement("div");
+        row.className = "ban-item";
+        row.innerHTML = `
+            <div class="queue-cover">
+                ♪
+            </div>
+            <div class="ban-item-info">
+                <div class="ban-item-name">
+                    ${song.title}
+                </div>
+                <div class="ban-item-meta">
+                    Utwór zbanowany
+                </div>
+            </div>
+            <button
+                class="small-button"
+                onclick="unbanSong(${index})"
+            >
+                Usuń
+            </button>
+        `;
+        container.appendChild(row);
+    });
+}
+function unbanSong(index) {
+    const title =
+        bannedSongs[index].title;
+    bannedSongs.splice(index, 1);
+    renderBannedSongs();
+    if (
+        document.getElementById(
+            "bansModal"
+        ).classList.contains("active") &&
+        currentBanTab === "songs"
+    ) {
+        renderBanManagement();
+    }
+    showNotification(
+        `Usunięto bana na utwór: ${title}`
+    );
+}
+/* =====================================================
+   PLAYER
+===================================================== */
+let playing = true;
+function togglePlay() {
+    playing = !playing;
+    showNotification(
+        playing
+            ? "Odtwarzanie uruchomione."
+            : "Odtwarzanie zatrzymane."
+    );
+}
+function skipSong() {
+    if (queue.length === 0) {
+        showNotification(
+            "Kolejka jest pusta."
+        );
+        return;
+    }
+    const next =
+        queue.shift();
+    document.getElementById(
+        "currentSong"
+    ).textContent =
+        next.title;
+    document.getElementById(
+        "currentUser"
+    ).textContent =
+        next.user;
+    renderQueue();
+    resetVotes();
+    showNotification(
+        `Pominięto: ${next.title}`
+    );
+}
+/* =====================================================
+   VOTE SKIP
+===================================================== */
+function updateVoteSkip() {
+    const enabled =
+        document.getElementById(
+            "voteSkipEnabled"
+        ).checked;
+    showNotification(
+        enabled
+            ? "Vote Skip włączony."
+            : "Vote Skip wyłączony."
+    );
+}
+function changeThreshold() {
+    voteThreshold =
+        parseInt(
+            document.getElementById(
+                "voteThreshold"
+            ).value
+        ) || 30;
+    updateVoteDisplay();
+}
+function resetVotes() {
+    voteCount = 0;
+    updateVoteDisplay();
+    showNotification(
+        "Głosy zostały zresetowane."
+    );
+}
+function updateVoteDisplay() {
+    document.getElementById(
+        "voteCount"
+    ).textContent =
+        `${voteCount} / ${voteThreshold}`;
+}
+/* =====================================================
+   MODAL OUTSIDE CLICK
+===================================================== */
+function closeModalOutside(event, modalId) {
+    if (event.target.id === modalId) {
+        if (modalId === "timeoutModal") {
+            closeTimeoutModal();
+        }
+        if (modalId === "bansModal") {
+            closeBansModal();
+        }
+    }
+}
+/* =====================================================
+   NOTIFICATION
+===================================================== */
+let notificationTimer;
+function showNotification(message) {
+    const notification =
+        document.getElementById(
+            "notification"
+        );
+    notification.textContent =
+        message;
+    notification.classList.add(
+        "active"
+    );
+    clearTimeout(
+        notificationTimer
+    );
+    notificationTimer =
+        setTimeout(() => {
+            notification.classList.remove(
+                "active"
+            );
+        }, 3000);
+}
+/* =====================================================
+   INIT
+===================================================== */
+renderQueue();
+renderUsers();
+renderBannedSongs();
+updateVoteDisplay();
+</script>
+</body>
+</html>
